@@ -1,6 +1,7 @@
 import boto3
 import os
 import logging
+from datetime import datetime, timedelta
 
 from botocore.exceptions import ClientError
 
@@ -32,7 +33,7 @@ def filter_backups(clusterIds):
 
         logger.info('Filtering CloudHSM backups')
         for b in resp['Backups']:
-            if b['CreateTimestamp'] == '':
+            if b['CreateTimestamp'] > (datetime.now() - timedelta(days=1)):
                 hsmBackups.append(b['BackupId'])
     except (Exception, ClientError) as ce:
         logger.error('Failed to fetch backups. Reason: {}'.format(ce))
@@ -42,6 +43,10 @@ def filter_backups(clusterIds):
 def copy_backups(clusterIds, regions):
     hsmBackups = filter_backups(clusterIds)
     drRegions = [region.strip() for region in regions.split(',')]
+
+    if len(hsmBackups) == 0:
+        logger.info('No CloudHSM backup found for today\'s date')
+        return False
 
     for bid in hsmBackups:
         for region in drRegions:
@@ -54,8 +59,6 @@ def copy_backups(clusterIds, regions):
                 logger.info('Backup completed for {} to {}'.format(bid, region))
             except (Exception, ClientError) as ce:
                 logger.error('Failed to copy backup {} to {}. Reason: {}'.format(bid, region, ce))
-
-    return True
 
 def handler(event, context):
     if DR_REGIONS is None:
