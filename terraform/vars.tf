@@ -30,19 +30,19 @@ variable "session_token" {
 
 variable "cron_expression" {
   type        = string
-  default     = "0 12 * * ? *"
-  description = "[CRON expression](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-schedule-expressions.html) to determine how frequently `key creator` function will be invoked to check if new key pair needs to be generated for an IAM user"
+  default     = "0 0/2 * * ? *"
+  description = "By default, triggers the lambda function every 2 hours. Provide [CRON expression](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-schedule-expressions.html) to determine how frequently the lambda function will be invoked to copy backup to DR region(s)"
 }
 
 variable "function_role_name" {
   type        = string
-  default     = "cloud-hsm-dr"
+  default     = "cloudhsm-dr"
   description = "Name for IAM role to associate with the lambda function"
 }
 
 variable "function_name" {
   type        = string
-  default     = "cloud-hsm-dr"
+  default     = "cloudhsm-dr"
   description = "Name for the lambda function"
 }
 

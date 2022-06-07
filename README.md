@@ -12,3 +12,7 @@ This helps you achieve DR for your CloudHSM cluster by automatically copying the
 - Lambda
 - CloudWatch Event
 - IAM
+
+### Setup:
+- Make sure your IAM user/role have the necessary permissions attached. Refer to the [policy.json](policy.json) file for required permissions
+- Use the [terraform module](terraform) included in this repo to create all the AWS resources required to automatically backup CloudHSM backups to another region

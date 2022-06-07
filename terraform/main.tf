@@ -78,7 +78,7 @@ resource "aws_lambda_function" "cloudhsm_dr" {
   # checkov:skip=CKV_AWS_115: Setting reserved concurrent execution depends on user
   # checkov:skip=CKV_AWS_116: DLQ not required
   # checkov:skip=CKV_AWS_117: VPC deployment not required
-  # checkov:skip=CKV_AWS_173: By default environment variables are encrypted at rest
+  # checkov:skip=CKV_AWS_173: Environment variables encryption not required
   function_name    = var.key_creator_function_name
   description      = "Copy CloudHSM backup to another region"
   role             = aws_iam_role.cloudhsm_dr.arn
