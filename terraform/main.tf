@@ -73,13 +73,22 @@ resource "aws_lambda_permission" "cloudhsm_dr" {
   source_arn    = aws_cloudwatch_event_rule.cloudhsm_dr.arn
 }
 
+resource "aws_lambda_layer_version" "pytz" {
+  filename         = "pytz.zip"
+  source_code_hash = filebase64sha256("pytz.zip")
+  description      = "https://pypi.org/project/pytz/"
+  layer_name       = "pytz"
+
+  compatible_runtimes = ["python3.8", "python3.9"]
+}
+
 resource "aws_lambda_function" "cloudhsm_dr" {
   # checkov:skip=CKV_AWS_50: Enabling X-Ray tracing depends on user
   # checkov:skip=CKV_AWS_115: Setting reserved concurrent execution depends on user
   # checkov:skip=CKV_AWS_116: DLQ not required
   # checkov:skip=CKV_AWS_117: VPC deployment not required
   # checkov:skip=CKV_AWS_173: Environment variables encryption not required
-  function_name    = var.key_creator_function_name
+  function_name    = var.function_name
   description      = "Copy CloudHSM backup to another region"
   role             = aws_iam_role.cloudhsm_dr.arn
   filename         = data.archive_file.backup.output_path
@@ -90,6 +99,8 @@ resource "aws_lambda_function" "cloudhsm_dr" {
   memory_size                    = var.function_memory_size
   timeout                        = var.function_timeout
   reserved_concurrent_executions = var.function_reserved_concurrent_executions
+
+  layers = [aws_lambda_layer_version.pytz.arn]
 
   tracing_config {
     mode = var.function_xray_tracing_mode

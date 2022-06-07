@@ -2,6 +2,7 @@ import boto3
 import os
 import logging
 from datetime import datetime, timedelta
+import pytz
 
 from botocore.exceptions import ClientError
 
@@ -33,7 +34,7 @@ def filter_backups(clusterIds):
 
         logger.info('Filtering CloudHSM backups')
         for b in resp['Backups']:
-            if b['CreateTimestamp'] > (datetime.now() - timedelta(days=1)):
+            if b['CreateTimestamp'] > pytz.utc.localize(datetime.now() - timedelta(days=1)):
                 hsmBackups.append(b['BackupId'])
     except (Exception, ClientError) as ce:
         logger.error('Failed to fetch backups. Reason: {}'.format(ce))
