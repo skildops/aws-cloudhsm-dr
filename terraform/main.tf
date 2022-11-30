@@ -88,6 +88,7 @@ resource "aws_lambda_function" "cloudhsm_dr" {
   # checkov:skip=CKV_AWS_116: DLQ not required
   # checkov:skip=CKV_AWS_117: VPC deployment not required
   # checkov:skip=CKV_AWS_173: Environment variables encryption not required
+  # checkov:skip=CKV_AWS_272: Code signing not required
   function_name    = var.function_name
   description      = "Copy CloudHSM backup to another region"
   role             = aws_iam_role.cloudhsm_dr.arn
