@@ -10,11 +10,13 @@
 # supported CodeQL languages.
 #
 name: "codeql"
-
 on:
   push:
     branches:
       - '**'
+defaults:
+  run:
+    working-directory: src
 jobs:
   analyze:
     name: Analyze
