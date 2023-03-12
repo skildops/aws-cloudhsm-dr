@@ -34,6 +34,24 @@ variable "cron_expression" {
   description = "By default, triggers the lambda function every 2 hours. Provide [CRON expression](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-schedule-expressions.html) to determine how frequently the lambda function will be invoked to copy backup to DR region(s)"
 }
 
+variable "cwlog_retention_days" {
+  type        = number
+  default     = 90
+  description = "Number of days to retain the lambda logs stored in cloudwatch log group"
+}
+
+variable "cwlog_kms_key" {
+  type        = string
+  default     = ""
+  description = "ID/ARN/Alias of KMS key to encrypt the cloudwatch log group created for lambda function"
+}
+
+variable "cwlog_skip_destroy" {
+  type        = bool
+  default     = false
+  description = "Whether to delete the log group during the destroy operation. Setting to false will only delete the log group from terraform state"
+}
+
 variable "function_role_name" {
   type        = string
   default     = "cloudhsm-dr"

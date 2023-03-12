@@ -52,11 +52,11 @@ resource "aws_iam_role_policy_attachment" "cloudhsm_dr_logs" {
 }
 
 resource "aws_cloudwatch_event_rule" "cloudhsm_dr" {
-  name        = "CloudHSMDR"
-  description = "Triggers a lambda function periodically that copys CloudHSM backup(s) to another region(s)"
-  is_enabled  = true
-
+  name                = "CloudHSMDR"
+  description         = "Triggers a lambda function periodically that copys CloudHSM backup(s) to another region(s)"
+  is_enabled          = true
   schedule_expression = "cron(${var.cron_expression})"
+  tags                = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "cloudhsm_dr" {
@@ -82,6 +82,19 @@ resource "aws_lambda_layer_version" "pytz" {
   compatible_runtimes = ["python3.8", "python3.9"]
 }
 
+data "aws_kms_key" "cwlog" {
+  count  = var.cwlog_kms_key == "" ? 0 : 1
+  key_id = var.cwlog_kms_key
+}
+
+resource "aws_cloudwatch_log_group" "cloudhsm_dr" {
+  name              = "/aws/lambda/${var.function_name}"
+  retention_in_days = var.cwlog_retention_days
+  kms_key_id        = var.cwlog_kms_key == "" ? null : join(",", data.aws_kms_key.cwlog.*.arn)
+  skip_destroy      = var.cwlog_skip_destroy
+  tags              = var.tags
+}
+
 resource "aws_lambda_function" "cloudhsm_dr" {
   # checkov:skip=CKV_AWS_50: Enabling X-Ray tracing depends on user
   # checkov:skip=CKV_AWS_115: Setting reserved concurrent execution depends on user
@@ -90,7 +103,7 @@ resource "aws_lambda_function" "cloudhsm_dr" {
   # checkov:skip=CKV_AWS_173: Environment variables encryption not required
   # checkov:skip=CKV_AWS_272: Code signing not required
   function_name    = var.function_name
-  description      = "Copy CloudHSM backup to another region"
+  description      = "Copy CloudHSM backups to another region"
   role             = aws_iam_role.cloudhsm_dr.arn
   filename         = data.archive_file.backup.output_path
   source_code_hash = data.archive_file.backup.output_base64sha256
