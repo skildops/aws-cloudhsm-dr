@@ -1,12 +1,5 @@
-data "template_file" "backup" {
-  template = file("../src/backup.py")
-}
-
 data "archive_file" "backup" {
   type        = "zip"
+  source_file = "${path.module}/../src/backup.py"
   output_path = "${path.module}/backup.zip"
-  source {
-    content  = data.template_file.backup.rendered
-    filename = "backup.py"
-  }
 }
